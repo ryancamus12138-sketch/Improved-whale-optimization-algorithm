@@ -1,73 +1,71 @@
-# Improved Whale Optimization Algorithm: Benchmark Reproduction
+Improved Whale Optimization Algorithm (IWOA)
 
-Independent Python implementation of the Improved Whale Optimization Algorithm (IWOA) and the F1-F9 benchmark experiment from Chu et al. (2024).
+A clean-room Python reproduction of the Improved Whale Optimization Algorithm (IWOA) and its F1-F9 benchmark study.
 
-This deliberately contains **only the algorithm and benchmark reproduction**:
 
-- implementations of IWOA, baseline WOA, PSO and SMA;
-- nine benchmark functions F1-F9 with the domains and dimensions reported in Table 6;
-- a fixed-seed, 30-run experiment harness using the paper's 1,000-iteration configuration;
-- committed formal outputs: per-run scores, summary statistics and a convergence plot.
 
-No water-resource scheduling model, real-world case data, allocation results, or related assumptions are included.
 
-## IWOA implementation
+This repository reproduces the optimisation algorithm proposed in:
 
-`src/iwoa/optimizers/iwoa.py` implements the four mechanisms in Eqs. (14)-(22):
+Chu, J., Wang, Z., Bao, X., Yao, Z., & Cui, X. (2024). Addressing the contradiction between water supply and demand: a study on multi-objective regional water resources optimization allocation. Environment, Development and Sustainability.
+DOI: 10.1007/s10668-024-05214-z
 
-1. Tent-Logistic-Cosine chaotic population initialization;
-2. nonlinear chaotic convergence factor;
-3. Mantegna adaptive Levy-flight search update;
-4. greedy sine/cosine spiral position update.
+Overview
 
-The paper does not release original source code. This is a clean-room implementation: Eq. 14 is mapped from its cosine output interval `[-1, 1]` to optimizer bounds only when initializing the population, and the two Eq. 21/22 candidates are compared directly using the objective as described in the paper.
+The Whale Optimization Algorithm (WOA) is a population-based metaheuristic inspired by humpback whales' bubble-net hunting strategy. It alternates between encircling the current best solution, spiral movement, and exploration around randomly selected individuals.
 
-## Layout
+The paper improves standard WOA to reduce premature convergence and strengthen global search. This repository implements the following four mechanisms from Eqs. (14)-(22):
 
-```text
-experiments/run_benchmarks.py  Run the F1-F9 comparison
-src/iwoa/benchmarks.py         Benchmark definitions
-src/iwoa/optimizers/           IWOA, WOA, PSO and SMA
-tests/                         Optimizer invariants
-results/                       Formal 30-run outputs and convergence figure
-```
+Tent-Logistic-Cosine chaotic initialization - generates a more diverse initial population than uniform random initialization.
 
-## Setup and reproduction
+Chaotic convergence factor - replaces WOA's linear decay of the convergence factor with a nonlinear chaotic schedule.
 
-```bash
-python -m venv .venv
-source .venv/bin/activate       # Windows: .venv\\Scripts\\activate
-python -m pip install -e ".[dev]"
-pytest -q
+Adaptive Levy flight - introduces long-range search steps during exploration to help escape local optima.
 
-# Paper-scale benchmark protocol: 30 runs, 1,000 iterations
-python experiments/run_benchmarks.py
-```
+Greedy sine-cosine spiral update - generates sine and cosine spiral candidates around the best whale, retaining the candidate with better fitness.
 
-For a quick validation run:
+Reproduction scope
 
-```bash
-python experiments/run_benchmarks.py --runs 2 --population 15 --iterations 80 --out results/smoke
-```
+This is an algorithm and benchmark reproduction only. It contains:
 
-## Included formal outputs
+IWOA, standard WOA, Particle Swarm Optimization (PSO), and Slime Mould Algorithm (SMA);
 
-- `results/benchmark_runs.csv`: final score from every independent run.
-- `results/benchmark_summary.csv`: best, worst, mean and standard deviation per algorithm/function pair.
-- `results/benchmark_convergence.png`: mean best-so-far convergence across runs.
+nine benchmark functions F1-F9, including the domains and dimensions reported in Table 6;
 
-The committed F9 result uses the four-dimensional **Shekel-5** function, as evidenced by the paper's stated optimum `-10.1532`; the IWOA best score is `-10.153198`.
+a fixed-seed experiment harness for 30 independent runs and 1,000 iterations;
 
-## Citation
+committed result tables and convergence curves.
 
-```bibtex
-@article{chu2024iwoa,
-  title   = {Addressing the contradiction between water supply and demand: a study on multi-objective regional water resources optimization allocation},
-  author  = {Chu, Jingyi and Wang, Zhaocai and Bao, Xiaoguang and Yao, Zhiyuan and Cui, Xuefei},
-  journal = {Environment, Development and Sustainability},
-  year    = {2024},
-  doi     = {10.1007/s10668-024-05214-z}
-}
-```
+It intentionally excludes the paper's water-allocation case study and real-world scheduling data.
 
-MIT License. The source-paper copyright remains with its rightsholders.
+Benchmark experiment
+
+The experiment compares IWOA, WOA, PSO, and SMA on nine benchmark functions.
+
+Group
+
+Functions
+
+Purpose
+
+Unimodal
+
+F1-F4
+
+Evaluates convergence accuracy on simpler search landscapes
+
+Multimodal
+
+F5-F8
+
+Evaluates the ability to avoid local optima
+
+Fixed-dimensional multimodal
+
+F9
+
+Four-dimensional Shekel-5 function
+
+The included experiment follows the paper-scale protocol: 30 independent runs and 1,000 iterations.
+
+The reproduced F9 implementation is the four-dimensional Shekel-5 function. IWOA reaches a best value of -10.153198, consistent with the paper's reported optimum of -10.1532.
